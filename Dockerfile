@@ -3,7 +3,7 @@
 #::::::::::::::#
 
 # syntax=docker/dockerfile:1.4
-FROM ubuntu:25.04 AS base
+FROM kalilinux/kali-rolling:latest AS base
 
 # Configure default user and set env
 # The users UID and GID will be set on container startup
@@ -102,9 +102,6 @@ _BUILD_SDL_JSTEST
 
 FROM base AS base-app
 
-ARG GAMESCOPE_VERSION="3.15.14"
-ENV GAMESCOPE_VERSION=$GAMESCOPE_VERSION
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_ARCHITECTURE=amd64
 ENV DEB_BUILD_OPTIONS=noddebs
@@ -120,7 +117,6 @@ ARG REQUIRED_PACKAGES="\
     libnvidia-egl-wayland1 libnvidia-egl-gbm1 \
     fonts-noto-cjk \
     locales \
-    gamescope \
     xwayland kitty nano \
     waybar fonts-font-awesome xdg-desktop-portal xdg-desktop-portal-gtk psmisc \
     "
@@ -137,7 +133,6 @@ RUN locale-gen en_US.UTF-8
 
 COPY assets/base-app/configs /cfg
 
-COPY --chmod=777 assets/base-app/scripts/init-gamescope.sh /etc/cont-init.d/init-gamescope.sh
 COPY --chmod=777 assets/base-app/scripts/launch-comp.sh /opt/gow/launch-comp.sh
 COPY --chmod=777 assets/base-app/scripts/startup.sh /opt/gow/startup.sh
 COPY --chmod=777 assets/base-app/scripts/wait-x11 /opt/gow/wait-x11
@@ -147,9 +142,6 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=sdl-jstest-builder /sdl-jstest/build/sdl2-jstest /usr/local/bin/sdl2-jstest
 
-# Add /usr/games/ to $PATH in order to be able to run gamescope
-ENV PATH="/usr/games/:${PATH}"
-
 #################################
 # Install Sway
 #################################
@@ -158,27 +150,9 @@ ENV PATH="/usr/games/:${PATH}"
 RUN <<_INSTALL_SWAY
 #!/bin/bash
 set -e
-curl -L -o sway.deb https://launchpad.net/ubuntu/+source/sway/1.9-1build2/+build/28013086/+files/sway_1.9-1build2_amd64.deb
 apt update
-apt install -y --no-install-recommends ./sway.deb
-rm -rf /var/lib/apt/lists/* ./sway.deb
+apt install -y sway swaybg polkitd libwlroots-0.19-dev libwlroots-0.19 libwayland-dev libxcb-icccm4
 _INSTALL_SWAY
-
-#################################
-# Install MangoHuD
-#################################
-RUN <<_INSTALL_MANGO
-#!/bin/bash
-set -e
-source /opt/gow/bash-lib/utils.sh
-
-github_download "flightlessmango/MangoHud" ".assets[]|select(.name|endswith(\".tar.gz\")).browser_download_url" "MangoHud.tar.gz"
-tar xf MangoHud.tar.gz
-cd MangoHud
-tar xf MangoHud-package.tar
-chmod +x ./mangohud-setup.sh && ./mangohud-setup.sh install
-rm -rf /MangoHud*
-_INSTALL_MANGO
 
 # Configure the default directory to be the 'retro' users home directory
 WORKDIR ${HOME}
@@ -195,7 +169,6 @@ ARG CORE_PACKAGES=" \
     wget \
     gnupg2 \
     dbus-x11 \
-    firefox \
     flatpak \
     sudo \
     "
@@ -203,9 +176,6 @@ ARG CORE_PACKAGES=" \
 ARG DE_PACKAGES=" \
     xfce4 \
     xfce4-settings \
-    xubuntu-default-settings \
-    xubuntu-icon-theme \
-    papirus-icon-theme arc-theme \
     at-spi2-core \
     "
 
@@ -228,7 +198,6 @@ RUN \
     # Setup Firefox PPA \
     apt-get update && \
     apt-get install -y --no-install-recommends software-properties-common gpg-agent && \
-    add-apt-repository -y ppa:mozillateam/ppa && \
     apt-get update && \
     # \
     # Install core packages \
