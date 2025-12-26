@@ -174,20 +174,16 @@ ARG CORE_PACKAGES=" \
     "
 
 ARG DE_PACKAGES=" \
-    xfce4 \
-    xfce4-settings \
+    kali-desktop-xfce \
+    kali-wallpapers-2023 \
+    kali-wallpapers-2022 \
+    kali-wallpapers-2020.4 \
     at-spi2-core \
     "
 
 ARG ADDITIONAL_PACKAGES=" \
-    xfce4-terminal \
-    xfce4-taskmanager \
-    xfce4-whiskermenu-plugin \
-    xfce4-docklike-plugin \
-    xarchiver \
-    mousepad \
+    kali-linux-default \
     zip unzip p7zip-full \
-    gnome-software gnome-software-plugin-flatpak \
     "
 #
 # Prevent firefox snap
