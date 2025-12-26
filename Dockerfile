@@ -167,6 +167,7 @@ FROM base-app
 ARG CORE_PACKAGES=" \
     lsb-release \
     wget \
+    fish \
     gnupg2 \
     dbus-x11 \
     flatpak \
@@ -227,7 +228,7 @@ COPY --chmod=777 assets/xfce/scripts/startdbus.sh /opt/gow/startdbus
 
 #
 # Include default xfce config
-COPY --chmod=777 --chown=retro:retro assets/xfce/scripts/xfce4 /opt/gow/xfce4
+#COPY --chmod=777 --chown=retro:retro assets/xfce/scripts/xfce4 /opt/gow/xfce4
 
 #
 # Fix locals
